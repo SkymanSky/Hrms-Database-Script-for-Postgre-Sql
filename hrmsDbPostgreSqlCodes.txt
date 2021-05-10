@@ -1,0 +1,167 @@
+-- Database: hrms
+
+-- DROP DATABASE hrms;
+
+CREATE DATABASE hrms
+    WITH 
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'English_United States.1252'
+    LC_CTYPE = 'English_United States.1252'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1;
+
+-- Table: public.employers
+
+-- DROP TABLE public.employers;
+
+CREATE TABLE public.employers
+(
+    user_id bigint NOT NULL,
+    company_name character(50) COLLATE pg_catalog."default" NOT NULL,
+    web_site character(50) COLLATE pg_catalog."default" NOT NULL,
+    tel_no character(50) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT employers_pkey PRIMARY KEY (user_id),
+    CONSTRAINT employers_employer_id_fkey FOREIGN KEY (user_id)
+        REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.employers
+    OWNER to postgres;
+
+-- Table: public.job_seekers
+
+-- DROP TABLE public.job_seekers;
+
+CREATE TABLE public.job_seekers
+(
+    user_id integer NOT NULL,
+    first_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    last_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    tcno character varying(11) COLLATE pg_catalog."default" NOT NULL,
+    birth_date character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT job_seekers_pkey PRIMARY KEY (user_id),
+    CONSTRAINT uk_tcno UNIQUE (tcno)
+        INCLUDE(tcno),
+    CONSTRAINT job_seekers_job_seeker_id_fkey FOREIGN KEY (user_id)
+        REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.job_seekers
+    OWNER to postgres;
+
+-- Table: public.positions
+
+-- DROP TABLE public.positions;
+
+CREATE TABLE public.positions
+(
+    id integer NOT NULL DEFAULT nextval('positions_id_seq'::regclass),
+    position_name character(50) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT positions_pkey PRIMARY KEY (id),
+    CONSTRAINT uk_position_name UNIQUE (position_name)
+        INCLUDE(position_name)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.positions
+    OWNER to postgres;
+
+-- Table: public.users
+
+-- DROP TABLE public.users;
+
+CREATE TABLE public.users
+(
+    id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
+    user_no character(50) COLLATE pg_catalog."default" NOT NULL,
+    email character(50) COLLATE pg_catalog."default" NOT NULL,
+    password character(50) COLLATE pg_catalog."default" NOT NULL,
+    password_validate character(50) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT users_pkey PRIMARY KEY (id),
+    CONSTRAINT uk_email UNIQUE (email)
+        INCLUDE(email),
+    CONSTRAINT uk_user_no UNIQUE (user_no)
+        INCLUDE(user_no)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.users
+    OWNER to postgres;
+
+-- Table: public.validation_types
+
+-- DROP TABLE public.validation_types;
+
+CREATE TABLE public.validation_types
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    validation_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT validation_types_pkey PRIMARY KEY (id),
+    CONSTRAINT uk_validation_name UNIQUE (validation_name)
+        INCLUDE(validation_name)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.validation_types
+    OWNER to postgres;
+
+-- Table: public.validations
+
+-- DROP TABLE public.validations;
+
+CREATE TABLE public.validations
+(
+    validation_id integer NOT NULL,
+    validation_status boolean NOT NULL,
+    validation_type smallint NOT NULL,
+    CONSTRAINT validations_pkey PRIMARY KEY (validation_id),
+    CONSTRAINT validaitons_validation_type_fkey FOREIGN KEY (validation_type)
+        REFERENCES public.validation_types (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT validations_validation_id_fkey FOREIGN KEY (validation_id)
+        REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.validations
+    OWNER to postgres;
+-- Index: fki_validaitons_validation_type_fkey
+
+-- DROP INDEX public.fki_validaitons_validation_type_fkey;
+
+CREATE INDEX fki_validaitons_validation_type_fkey
+    ON public.validations USING btree
+    (validation_type ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+CREATE TABLE public.employees
+(
+    user_id serial NOT NULL,
+    first_name character varying(50) NOT NULL,
+    last_name character varying(50) NOT NULL,
+    email character varying(50) NOT NULL,
+    PRIMARY KEY (user_id)
+);
+
+ALTER TABLE public.employees
+    OWNER to postgres;
